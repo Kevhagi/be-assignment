@@ -1,0 +1,88 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator db {
+    provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+// ### Account Manager Service ###
+// * User
+model User {
+    id        String    @id @default(cuid()) @db.VarChar(30)
+    email     String
+    password  String
+    // supabaseId
+    createdAt DateTime  @default(now())
+    details   Profile?
+    accounts  Account[]
+}
+
+// * User Profile
+model Profile {
+    id          String   @id @default(cuid()) @db.VarChar(30)
+    userId      String   @unique
+    firstName   String
+    lastName    String
+    phoneNumber String
+    createdAt   DateTime @default(now())
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+// * User Payment Account
+model Account {
+    id                      String        @id @default(cuid()) @db.VarChar(30)
+    userId                  String
+    balance                 Decimal
+    createdAt               DateTime      @default(now())
+    user                    User          @relation(fields: [userId], references: [id])
+    bills                   Bill[]
+    sourceStatements        Statement[]   @relation("Source")
+    receiverStatements      Statement[]   @relation("Destination")
+    sourceTransactions      Transaction[] @relation("Source")
+    destinationTransactions Transaction[] @relation("Destination")
+}
+
+// * User Payment Account Bill
+// Used for Credit / Loan Payment Account
+model Bill {
+    id           String   @id @default(cuid()) @db.VarChar(30)
+    accountId    String
+    period       String
+    dueDate      String
+    amount       Decimal
+    paidAmount   Decimal
+    unpaidAmount Decimal
+    createdAt    DateTime @default(now())
+    account      Account  @relation(fields: [accountId], references: [id])
+}
+
+// * User Payment Account Statement
+model Statement {
+    id            String   @id @default(cuid()) @db.VarChar(30)
+    type          String
+    sourceId      String
+    destinationId String
+    amount        Decimal
+    createdAt     DateTime @default(now())
+    source        Account  @relation("Source", fields: [sourceId], references: [id])
+    destination   Account  @relation("Destination", fields: [destinationId], references: [id])
+}
+
+// Payment Manager Service
+// * User Payment Account Transaction
+model Transaction {
+    id                 String   @id @default(cuid()) @db.VarChar(30)
+    sourceId           String
+    destinationId      String
+    type               String
+    amount             Decimal
+    status             String
+    issuedTimestamp    DateTime @default(now())
+    cancelledTimestamp DateTime
+    refusedTimestamp   DateTime
+    completeTimestamp  DateTime
+    source             Account  @relation("Source", fields: [sourceId], references: [id])
+    destination        Account  @relation("Destination", fields: [destinationId], references: [id])
+}
