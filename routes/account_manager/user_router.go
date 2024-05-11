@@ -1,6 +1,7 @@
 package accountmanagerroutes
 
 import (
+	config "be-assignment/configs"
 	controllerImplement "be-assignment/controllers/implement"
 	"be-assignment/prisma/db"
 	repositoryImplement "be-assignment/repositories/implement"
@@ -11,9 +12,15 @@ import (
 )
 
 func UserRoutes(g *gin.Engine, gr *gin.RouterGroup, db *db.PrismaClient) {
-	userRepository := repositoryImplement.RepositoryUser(db)
-	userService := serviceImplement.ServiceUser(userRepository)
-	userController := controllerImplement.ControllerUser(userService)
+	userRepository := repositoryImplement.RepositoryAccountManager(db)
+	userService := serviceImplement.ServiceAccountManager(userRepository)
+	userController := controllerImplement.ControllerAccountManager(userService)
+
+	gr.GET("/protected", config.WrapVerifySession(nil), func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Success access protected",
+		})
+	})
 
 	gr.GET("/test", func(ctx *gin.Context) {
 		users, err := userController.GetUsers(ctx)

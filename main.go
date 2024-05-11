@@ -4,8 +4,10 @@ import (
 	config "be-assignment/configs"
 	"be-assignment/routes"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
@@ -13,8 +15,6 @@ func main() {
 	g := gin.Default()
 
 	db := config.ConnectDB()
-
-	routes.RouteInit(g, db)
 
 	g.Use(func(ctx *gin.Context) {
 		config.InitSupertokens(ctx, db)
@@ -27,6 +27,23 @@ func main() {
 		ctx.Abort()
 	})
 
-	// Listen and Server in 0.0.0.0:8080
-	g.Run(":8080")
+	routes.RouteInit(g, db)
+
+	if err := godotenv.Load(); err != nil {
+		panic("Failed to load env file")
+	}
+
+	if PORT := os.Getenv("PORT"); PORT != "" {
+		// Handling specified PORT in .env file
+		err := g.Run(":" + PORT)
+		if err != nil {
+			panic("[Error] failed to start Gin server due to: " + err.Error())
+		}
+	} else {
+		// Handling default PORT by Gin
+		err := g.Run()
+		if err != nil {
+			panic("[Error] failed to start Gin server due to: " + err.Error())
+		}
+	}
 }

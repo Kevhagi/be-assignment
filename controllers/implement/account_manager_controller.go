@@ -7,17 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ControllerImplement struct {
+type AccountManagerControllerImplement struct {
 	UserService service.UserService
 }
 
-func ControllerUser(
+func ControllerAccountManager(
 	UserService service.UserService,
 ) service.UserService {
-	return &ControllerImplement{UserService}
+	return &AccountManagerControllerImplement{UserService}
 }
 
-func (s *ControllerImplement) GetUsers(ctx *gin.Context) ([]accountmanagerdto.UserResponse, error) {
+func (s *AccountManagerControllerImplement) GetUsers(ctx *gin.Context) ([]accountmanagerdto.UserResponse, error) {
 	users, err := s.UserService.GetUsers(ctx)
 	if err != nil {
 		print("HOHOHOHOHO")

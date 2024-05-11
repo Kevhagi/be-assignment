@@ -8,21 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ServiceImplement struct {
+type AccountManagerServiceImplement struct {
 	UserRepository repository.UserRepository
 }
 
-func ServiceUser(
+func ServiceAccountManager(
 	UserRepository repository.UserRepository,
 ) service.UserService {
-	return &ServiceImplement{UserRepository}
+	return &AccountManagerServiceImplement{UserRepository}
 }
 
-func (s *ServiceImplement) GetUsers(ctx *gin.Context) ([]accountmanagerdto.UserResponse, error) {
+func (s *AccountManagerServiceImplement) GetUsers(ctx *gin.Context) ([]accountmanagerdto.UserResponse, error) {
 	users, err := s.UserRepository.GetUsers(ctx)
 	if err != nil {
-		print("HOKHOKHOKHOKHOK")
-		print(err)
+		return nil, err
 	}
 	return users, err
 }

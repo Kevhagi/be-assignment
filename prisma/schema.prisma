@@ -32,8 +32,9 @@ model Profile {
 // * User Payment Account
 model Account {
     id                      String        @id @default(cuid()) @db.VarChar(30)
+    type                    String        @default("Debit")
     userId                  String
-    balance                 Decimal       @default(0)
+    balance                 Decimal       @default(0.00) @db.Decimal(65, 2)
     createdAt               DateTime      @default(now())
     user                    User          @relation(fields: [userId], references: [id])
     bills                   Bill[]
@@ -50,9 +51,9 @@ model Bill {
     accountId    String
     period       String
     dueDate      String
-    amount       Decimal
-    paidAmount   Decimal
-    unpaidAmount Decimal
+    amount       Decimal  @default(0.00) @db.Decimal(65, 2)
+    paidAmount   Decimal  @default(0.00) @db.Decimal(65, 2)
+    unpaidAmount Decimal  @default(0.00) @db.Decimal(65, 2)
     createdAt    DateTime @default(now())
     account      Account  @relation(fields: [accountId], references: [id])
 }
@@ -63,7 +64,7 @@ model Statement {
     type          String
     sourceId      String
     destinationId String
-    amount        Decimal
+    amount        Decimal  @default(0.00) @db.Decimal(65, 2)
     createdAt     DateTime @default(now())
     source        Account  @relation("Source", fields: [sourceId], references: [id])
     destination   Account  @relation("Destination", fields: [destinationId], references: [id])
@@ -72,16 +73,14 @@ model Statement {
 // Payment Manager Service
 // * User Payment Account Transaction
 model Transaction {
-    id                 String   @id @default(cuid()) @db.VarChar(30)
-    sourceId           String
-    destinationId      String
-    type               String
-    amount             Decimal
-    status             String
-    issuedTimestamp    DateTime @default(now())
-    cancelledTimestamp DateTime
-    refusedTimestamp   DateTime
-    completeTimestamp  DateTime
-    source             Account  @relation("Source", fields: [sourceId], references: [id])
-    destination        Account  @relation("Destination", fields: [destinationId], references: [id])
+    id            String   @id @default(cuid()) @db.VarChar(30)
+    sourceId      String
+    destinationId String
+    type          String
+    amount        Decimal  @default(0.00) @db.Decimal(65, 2)
+    currency      String
+    status        String
+    timestamp     DateTime @default(now())
+    source        Account  @relation("Source", fields: [sourceId], references: [id])
+    destination   Account  @relation("Destination", fields: [destinationId], references: [id])
 }
