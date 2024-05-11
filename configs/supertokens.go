@@ -1,16 +1,18 @@
 package config
 
 import (
+	"be-assignment/prisma/db"
 	"fmt"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword/epmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
-func InitSupertokens() {
+func InitSupertokens(ctx *gin.Context, client *db.PrismaClient) {
 	err := supertokens.Init(supertokens.TypeInput{
 		Supertokens: &supertokens.ConnectionInfo{
 			ConnectionURI: os.Getenv("SUPERTOKENS_CONNECTION_URI"),
@@ -44,7 +46,14 @@ func InitSupertokens() {
 								user := response.OK.User
 
 								// TODO: Post sign up logic.
-								fmt.Println(user)
+								client.User.CreateOne(
+									db.User.Email.Set(user.Email),
+									db.User.SupertokensUserID.Set(user.ID),
+								).Exec(ctx)
+
+								client.Account.CreateOne(
+									db.Account.UserID.Set(user.ID),
+								).Exec(ctx)
 
 							}
 							return response, nil

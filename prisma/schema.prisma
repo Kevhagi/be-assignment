@@ -10,13 +10,12 @@ generator db {
 // ### Account Manager Service ###
 // * User
 model User {
-    id        String    @id @default(cuid()) @db.VarChar(30)
-    email     String
-    password  String
-    // supabaseId
-    createdAt DateTime  @default(now())
-    details   Profile?
-    accounts  Account[]
+    id                String    @id @default(cuid()) @db.VarChar(30)
+    email             String
+    supertokensUserId String
+    createdAt         DateTime  @default(now())
+    details           Profile?
+    accounts          Account[]
 }
 
 // * User Profile
@@ -34,7 +33,7 @@ model Profile {
 model Account {
     id                      String        @id @default(cuid()) @db.VarChar(30)
     userId                  String
-    balance                 Decimal
+    balance                 Decimal       @default(0)
     createdAt               DateTime      @default(now())
     user                    User          @relation(fields: [userId], references: [id])
     bills                   Bill[]

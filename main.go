@@ -1,7 +1,7 @@
 package main
 
 import (
-	config "be-assignment/config"
+	config "be-assignment/configs"
 	"be-assignment/routes"
 	"net/http"
 
@@ -12,18 +12,19 @@ import (
 func main() {
 	g := gin.Default()
 
-	routes.RouteInit(g.Group("/"))
+	db := config.ConnectDB()
 
-	config.ConnectDB()
-	config.InitSupertokens()
+	routes.RouteInit(g, db)
 
-	g.Use(func(c *gin.Context) {
+	g.Use(func(ctx *gin.Context) {
+		config.InitSupertokens(ctx, db)
+
 		supertokens.Middleware(http.HandlerFunc(
 			func(rw http.ResponseWriter, r *http.Request) {
-				c.Next()
-			})).ServeHTTP(c.Writer, c.Request)
+				ctx.Next()
+			})).ServeHTTP(ctx.Writer, ctx.Request)
 		// we call Abort so that the next handler in the chain is not called, unless we call Next explicitly
-		c.Abort()
+		ctx.Abort()
 	})
 
 	// Listen and Server in 0.0.0.0:8080
